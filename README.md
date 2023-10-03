@@ -1,2 +1,2 @@
 # Tarea-2-Comunicacion-Datos
-CRC
+Implementar en ***Python*** el código de deteccionde errores CRC.
