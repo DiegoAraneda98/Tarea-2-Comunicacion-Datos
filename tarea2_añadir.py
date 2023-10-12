@@ -32,11 +32,11 @@ archivos_dataset1 = glob.glob(os.path.join(carpeta_dataset1, "*.txt"))
 # Procesar los archivos del dataset1
 for archivo in archivos_dataset1:
     datos = leer_datos_desde_archivo(archivo)
-    print("Datos de", archivo, ":", datos)
+    """ print("Datos de", archivo, ":", datos) """
 
     # Calcular el CRC-CCITT para los datos
     crc_calculado = calcular_crc_ccitt(datos, polinomio_crc)
-    print("CRC-CCITT calculado:", crc_calculado)
+    print("Secuencia generada para", archivo, ":", crc_calculado)
 
 
 

@@ -33,17 +33,17 @@ archivos_dataset2 = glob.glob(os.path.join(carpeta_dataset2, "*.txt"))
 # Procesar los archivos del dataset2
 for archivo in archivos_dataset2:
     datos = leer_datos_desde_archivo(archivo)
-    print("Datos de", archivo, ":", datos)
+    print("Datos de", archivo)
 
     # Calcular el CRC-CCITT para la trama
     crc_calculado = calcular_crc_ccitt(datos, polinomio_crc)
 
     # Verificar si los datos contienen errores
-    es_correcto = crc_calculado == "0" * 16  # Compara con 16 ceros (suponiendo un CRC de 16 bits)
+    es_correcto = crc_calculado == "0" * 16  # Compara con 16 ceros 
     if es_correcto:
-        print("La trama no contiene errores.")
+        print("NO")
     else:
-        print("La trama contiene errores.")
+        print("SI")
 
     # Secuencia generada en receptor
     secuencia_receptor = datos[:-16]  # Suponiendo que el CRC tiene 16 bits
