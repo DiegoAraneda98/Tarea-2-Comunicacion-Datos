@@ -63,4 +63,4 @@ for archivo in archivos_dataset2:
         print("Los datos son correctos.")
     else:
         print("Los datos contienen errores.")
->>>>>>> Stashed changes
+
