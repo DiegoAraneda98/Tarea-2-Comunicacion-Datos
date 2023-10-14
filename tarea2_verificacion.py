@@ -1,50 +1,53 @@
 import os
 import glob
 
-# Polinomio CRC-CCITT
-polinomio_crc = "10001000000100001"  # X^16 + X^12 + X^5 + 1
+def calcular_crc(trama, polinomio):
+    trama = list(trama)
+    polinomio = list(polinomio)
+    trama.extend(['0' for _ in range(len(polinomio) - 1)])
 
-# Función para leer los datos desde un archivo
-def leer_datos_desde_archivo(archivo):
+    while '1' in trama[:len(trama) - len(polinomio) + 1]:
+        index = trama.index('1')
+        for i in range(len(polinomio)):
+            trama[index + i] = str(int(trama[index + i]) ^ int(polinomio[i]))
+
+    return ''.join(trama[-len(polinomio) + 1:])
+
+def verificar_crc(trama, polinomio):
+    resto = calcular_crc(trama, polinomio)
+    return all(bit == '0' for bit in resto)
+
+# Directorio donde se encuentran los archivos .txt
+directorio = 'dataset2/'
+
+# Patrón de búsqueda de archivos .txt en el directorio
+patron = os.path.join(directorio, '*.txt')
+
+# Buscar archivos .txt en el directorio
+archivos = glob.glob(patron)
+
+# Polinomio CRC
+polinomio_crc = "10001000000100001"
+
+for archivo in archivos:
     with open(archivo, 'r') as file:
-        return file.read().strip()  # Lee el contenido del archivo y elimina espacios en blanco
+        trama_original = file.read().strip()  # Leer la trama desde el archivo
 
-# Función para calcular el CRC-CCITT de una secuencia de bits
-def calcular_crc_ccitt(bits, polinomio):
-    bits = list(map(int, bits))
-    polinomio = list(map(int, polinomio))
-    n = len(polinomio)
-    bits.extend([0] * (n - 1))
-    
-    for i in range(len(bits) - n + 1):
-        if bits[i] == 1:
-            for j in range(n):
-                bits[i + j] ^= polinomio[j]
-    
-    crc_result = ''.join(map(str, bits[-n + 1:]))
-    return crc_result
+        # Agregar el CRC a la trama
+        trama_con_crc = trama_original + calcular_crc(trama_original, polinomio_crc)
 
-# Ruta a la carpeta del dataset2 (ajusta la ruta según tu directorio)
-carpeta_dataset2 = "dataset2"
+        # Simulación de una transmisión con ruido (introduciendo un error)
+        trama_transmitida = list(trama_con_crc)
+        trama_transmitida[5] = '1'  # Cambia el bit para simular un error
 
-# Leer los archivos del dataset2
-archivos_dataset2 = glob.glob(os.path.join(carpeta_dataset2, "*.txt"))
+        # Verificar si la trama recibida tiene errores
+        tiene_errores = verificar_crc(''.join(trama_transmitida), polinomio_crc)
 
-# Procesar los archivos del dataset2
-for archivo in archivos_dataset2:
-    datos = leer_datos_desde_archivo(archivo)
-    print("Datos de", archivo)
+        if not tiene_errores:
+            print(f"Archivo: {archivo} - La trama tiene errores.")
+        else:
+            print(f"Archivo: {archivo} - La trama no tiene errores.")
 
-    # Calcular el CRC-CCITT para la trama
-    crc_calculado = calcular_crc_ccitt(datos, polinomio_crc)
-
-    # Verificar si los datos contienen errores
-    es_correcto = crc_calculado == "0" * 16  # Compara con 16 ceros 
-    if es_correcto:
-        print("NO")
-    else:
-        print("SI")
-
-    # Secuencia generada en receptor
-    secuencia_receptor = datos[:-16]  # Suponiendo que el CRC tiene 16 bits
-    print("Secuencia generada en receptor:", secuencia_receptor)
+        # Mostrar la secuencia generada en el receptor al revés
+        secuencia_generada = trama_con_crc[-len(polinomio_crc) + 1:][::-1]
+        print(f"Archivo: {archivo} - Secuencia generada receptor: {secuencia_generada}")
